@@ -18,6 +18,8 @@ const DEFAULTS = {
 	includeNative: false,
 	hideWhenIdle: false,
 	showCost: false,
+	includeExternal: true,
+	externalMatch: "pi-run.ps1",
 };
 const HIDE_KEY = "dsh-cli-hub.panel.hideAt";
 const OVERRIDE_KEY = "dsh-cli-hub.panel.override";
@@ -195,7 +197,7 @@ function fmtDur(ms) {
 }
 const STATUS = { running: ["运行中", "#d9a400"], completed: ["完成", "#3f9d5a"], error: ["出错", "#e5533c"], aborted: ["已取消", "#8a8a8a"] };
 function statusOf(run) { return STATUS[run.status] || ["…", "#8a8a8a"]; }
-function modelText(run) { return run.native ? (run.name || "dsh 内置") : (run.model || "CLI 默认"); }
+function modelText(run) { return run.native ? (run.name || "dsh 内置") : (run.model || (run.external ? "pi 默认" : "CLI 默认")); }
 /** 内置行的活动状态：host 给了 activity 就用，缺失时按 status 推断，界面不出现 undefined。 */
 function activityOf(run) {
 	if (!run?.native) return "";
@@ -872,6 +874,14 @@ function Settings({ connection }) {
 		}
 	};
 	const dirty = Object.keys(overrides).filter((key) => key in DEFAULTS);
+	// 外部任务的诊断行:静默失效时也能看出是没开、读不到服务还是关键字没命中。
+	const extInfo = snap.external;
+	const extNote = !extInfo ? "外部任务：未检测"
+		: !extInfo.enabled ? "外部任务：已关闭"
+			: extInfo.reason === "jobs-unavailable" ? "外部任务：当前 dsh 读不到 jobs 服务，此功能不可用"
+				: extInfo.reason === "no-matchers" ? "外部任务：匹配关键字为空，不会显示任何任务"
+					: extInfo.reason === "error" ? "外部任务：读取失败"
+						: `外部任务：本机后台任务 ${extInfo.jobs ?? 0} 个，命中 ${extInfo.matched ?? 0} 个`;
 	const row = (label, hint, control, key) => h("div", { className: "sap-setrow" },
 		h("div", { className: "sap-setlab" }, label, hint ? h("div", { className: "sap-sethint" }, hint) : null),
 		h("div", { className: "sap-setctl" }, control),
@@ -889,6 +899,17 @@ function Settings({ connection }) {
 			className: "sap-segbtn" + (String(cfg[key]) === value ? " sap-seg-on" : ""),
 			onClick: () => persist({ [key]: cast ? cast(value) : value }),
 		}, label)));
+	// 文本项：回车或失焦时写回,值没变就不发请求。
+	const text = (key, placeholder) => h("input", {
+		className: "sap-input",
+		defaultValue: cfg[key] ?? "",
+		placeholder,
+		onBlur: (event) => {
+			const next = String(event.target.value ?? "").trim();
+			if (next !== String(cfg[key] ?? "")) persist({ [key]: next });
+		},
+		onKeyDown: (event) => { if (event.key === "Enter") event.target.blur(); },
+	});
 	return h("div", { className: "sap-settings" },
 		h("div", { className: "sap-statbar" },
 			h("span", null, "总计 ", h("b", null, stats.total)),
@@ -900,6 +921,7 @@ function Settings({ connection }) {
 			h("span", { className: "sap-errt" }, "出错 ", h("b", null, stats.error)),
 			cfg.showCost ? h("span", null, `· 成本 $${stats.costUsd.toFixed(4)}`) : null,
 		),
+		h("div", { className: "sap-note" }, extNote),
 		h(Backends, { connection }),
 		h("div", { className: "sap-cols" },
 			h("div", { className: "sap-col" },
@@ -920,6 +942,8 @@ function Settings({ connection }) {
 				]),
 				group("数据", [
 					row("并入 dsh 内置子代理", "只读、带「内置」标", toggle("includeNative"), "includeNative"),
+					row("并入外部脚本任务", "如 pwsh 跑 pi-run.ps1 起的 pi；只读，不改你的脚本", toggle("includeExternal"), "includeExternal"),
+					row("外部任务匹配关键字", "逗号分隔，命令行包含任一关键字即算", text("externalMatch", "pi-run.ps1"), "externalMatch"),
 				]),
 			),
 		),
@@ -998,6 +1022,7 @@ const PANEL_STYLE = `
 .sap-pill.sap-on { background: #3f9d5a; }
 .sap-pill span { position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: left .15s; }
 .sap-pill.sap-on span { left: 19px; }
+.sap-input { width: 132px; font-size: 11.5px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); }
 .sap-seg { display: inline-flex; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; overflow: hidden; }
 .sap-segbtn { border: 0; background: transparent; color: var(--dsw-alias-label-secondary); font-size: 11.5px; padding: 3px 9px; cursor: pointer; }
 .sap-segbtn + .sap-segbtn { border-left: 1px solid var(--dsw-alias-border-l2); }

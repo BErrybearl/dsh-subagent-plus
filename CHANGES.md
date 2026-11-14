@@ -3,7 +3,22 @@
 本分支 = `dsh-subagent` 的社区增强分支，2.0.2 起 npm 包名为 `dsh-cli-hub`。
 与上游的逐版差异按版本倒序列在下面。
 
-## 2.0.2（未发布）
+## 2.0.3（未发布）
+
+- **新增「外部脚本任务」观测**：dsh 主控有时不调用本插件的委派工具，而是用 `pwsh` 跑脚本（如 WorkHub 的
+  `pi-run.ps1`）启动外部 CLI；这类任务不经过插件，dock / 面板原本完全看不到。现在 `runs` 路由会只读 dsh 的
+  `jobs` 服务（`ctx.get("jobs")`），把命令行含匹配关键字的后台任务映射成面板行，与插件自身的运行混排：
+  任务名取 `-Task` 的文件名，`-Thinking` 映射强度，`-Model` 有就显示、没有显示「pi 默认」，耗时按 job 的
+  `startedAt` / `finishedAt` 算；成本拿不到就显示「—」，不估算。行 `id` 前缀为 `ext:`。
+- **匹配规则可配置**：新增面板开关（写在 `cordis.patch.yml` 的 `panel` 节点）
+  `includeExternal`（默认开）与 `externalMatch`（默认 `pi-run.ps1`；逗号或空白分隔，命令行包含任一关键字即算）。
+  以后新增别的派发脚本只加一条关键字，不用改代码。
+- **停止按钮支持外部任务**：`stop` 路由识别 `ext:` 前缀，转调 `jobs.kill(jobId, owner, reason)`；
+  找不到归属会话时如实返回错误，不静默假成功。
+- 设计边界：只覆盖「由 dsh 自己的后台 job 跑的脚本任务」。绕过 dsh 直接在终端手敲、`Start-Job`、
+  或别的程序拉起的进程仍然看不到，不在本版范围。
+
+## 2.0.2（GitHub tag，未发 npm）
 
 - **npm 包名改为 `dsh-cli-hub`**：npm 上旧名 `dsh-subagent`（他人占位 0.0.1）与 `dsh-subagent-plus`（他人 0.0.3）都不是本项目，
   同名会让插件管理器把别人的包当成我们的新版、误报「可更新」。插件 id、`settings.section` id、RPC 前缀、存储/样式键、
