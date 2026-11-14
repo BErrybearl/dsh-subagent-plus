@@ -1,6 +1,6 @@
 {
   "name": "dsh-cli-subagent",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "把本机外部 CLI（Codex、Pi、Qoder、OpenCode、CodeBuddy 等）注册成 dsh 子代理，带运行面板、内置子代理观测与后端管理；dsh-subagent 的社区增强分支。",
   "type": "module",
   "main": "./lib/index.js",
