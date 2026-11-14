@@ -1,7 +1,19 @@
 # 本分支的改动
 
-本分支 = `dsh-subagent` 的社区增强分支，**2.0.0 起更名 `dsh-cli-subagent`**（内部插件 id 仍是 `subagent-cli`）。
+本分支 = `dsh-subagent` 的社区增强分支，2.0.2 起 npm 包名为 `dsh-cli-hub`。
 与上游的逐版差异按版本倒序列在下面。
+
+## 2.0.2（未发布）
+
+- **npm 包名改为 `dsh-cli-hub`**：npm 上旧名 `dsh-subagent`（他人占位 0.0.1）与 `dsh-subagent-plus`（他人 0.0.3）都不是本项目，
+  同名会让插件管理器把别人的包当成我们的新版、误报「可更新」。插件 id、`settings.section` id、RPC 前缀、存储/样式键、
+  `cordis.patch.yml` 条目名一并改为 `dsh-cli-hub`；GitHub 仓库名保留 `dsh-cli-subagent`。
+  运行记录目录迁到 `storages/dsh-cli-hub/runs`，首次启动自动从 `dsh-cli-subagent` / `dsh-subagent` 旧目录搬移，历史不丢。
+- **修所有后端派发报 `Cannot read properties of undefined (reading 'id')`**：调用 `ctx.subagents.startActivation` 时
+  把 `parent`/`prompt`/`cwd`/`model`/`reasoning` 误包在 `request` 子对象里，而 dsh 的 `SubagentActivationSpec` 这些字段在顶层；
+  dsh 读 `spec.parent.id` 时 parent 为 undefined 直接抛错，ptc 与标准模式都会中招。现在按顶层平铺传参。
+- 附带护栏：`#consumeEvent` 丢弃 null/非对象行；pi-json 仅在有 `event.id` 时上报会话 id；`upsertRunIndex` 对空 meta 容错。
+
 
 ## 2.0.1（未发布）
 

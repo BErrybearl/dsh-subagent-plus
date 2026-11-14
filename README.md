@@ -1,12 +1,11 @@
-# dsh-cli-subagent
+# dsh-cli-hub
 
 把本机的外部 CLI（Codex、Pi、Qoder、OpenCode、CodeBuddy 等）注册成 dsh（DeepSeek Harness）的**子代理后端**，
 再配一个看得见运行状态的轻量面板。
 
 本仓库是 [1373700184/dsh-subagent](https://github.com/1373700184/dsh-subagent)（MIT）的社区增强分支：
 委派协议、驱动与 CLI 适配来自上游，面板、后端管理与模型/强度选择是本分支新增的。
-**2.0.0 起更名 `dsh-cli-subagent`**（上游包名在 npm 上被他人占位，沿用会导致「可更新」误报），
-内部插件 id 仍为 `subagent-cli`。与上游的逐版差异见 [CHANGES.md](./CHANGES.md)，致谢见 [NOTICE](./NOTICE)。
+**2.0.2 起 npm 包名为 `dsh-cli-hub`**（旧名 `dsh-subagent`/`dsh-subagent-plus` 在 npm 上被他人占位，沿用会导致「可更新」误报；GitHub 仓库名仍是 `dsh-cli-subagent`）。与上游的逐版差异见 [CHANGES.md](./CHANGES.md)，致谢见 [NOTICE](./NOTICE)。
 
 ## 它现在长什么样
 
@@ -34,12 +33,12 @@
 
 只支持 dsh `>=0.2.2-rc.1 <0.3.0`（`engines.dsh` 与 peer 依赖同此范围），Node `^22.19.0 || >=24.0.0`。
 对 dsh 内部包的引用统一经 `lib/compat.js` 探测：缺包或缺导出时只降级对应功能，并在控制台打一行
-`[dsh-subagent] compat: ...` 说明缺什么，插件本体仍能加载。
+`[dsh-cli-hub] compat: ...` 说明缺什么，插件本体仍能加载。
 
 ## 安装
 
 ```sh
-dsh plugin --profile desktop add github:BErrybearl/dsh-cli-subagent#v2.0.0
+dsh plugin --profile desktop add dsh-cli-hub
 ```
 
 安装前请**完全退出 dsh**。装完重启生效。需要哪些 CLI，就先装好并登录对应的那个（插件只负责调用）。
@@ -47,7 +46,7 @@ dsh plugin --profile desktop add github:BErrybearl/dsh-cli-subagent#v2.0.0
 
 ## 配置
 
-运行时配置在 profile 的 `cordis.patch.yml`，`dsh-cli-subagent` 节点的 `config` 下（插件 id 为 `subagent-cli`）：
+运行时配置在 profile 的 `cordis.patch.yml`，`dsh-cli-hub` 节点的 `config` 下：
 
 ```yaml
 providers:                # 启用的后端；默认空，按设置页勾选生成

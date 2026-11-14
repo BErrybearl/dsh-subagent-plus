@@ -2,14 +2,14 @@ import React from "react";
 import { registerPanel } from "./panel.js";
 
 /**
-* dsh-cli-subagent 插件的浏览器端设置页:一个设置分区,
+* dsh-cli-hub 插件的浏览器端设置页:一个设置分区,
 * 列出所有已配置的 Qoder 系列后端,提供实时 CLI 探测(存在性、
 * 版本、模型目录),以及直接写回宿主插件配置的表单控件。
 * 写入通过 ctx.configForms 完成。
 */
-const name = "dsh-cli-subagent-client";
+const name = "dsh-cli-hub-client";
 const inject = ["slots", "locale", "configForms", "connection"];
-const ENTRY_ID = "dsh-cli-subagent";
+const ENTRY_ID = "dsh-cli-hub";
 const LOCALE_NS = "settings.dshCliSubagent";
 const LOCALES = {
 	zh: { meta: { title: "自由子代理", description: "把任务委派给本机已登录的外部 CLI 子代理,消耗各自会员额度。" }, nav: "自由子代理" },
@@ -83,7 +83,7 @@ const PERMISSION_MODES = [
 const h = React.createElement;
 
 function callRpc(connection, endpoint, payload, timeout = 60000) {
-	return connection.rpc.call("/api", `dsh-cli-subagent/${endpoint}`, payload, AbortSignal.timeout(timeout)).then((result) => {
+	return connection.rpc.call("/api", `dsh-cli-hub/${endpoint}`, payload, AbortSignal.timeout(timeout)).then((result) => {
 		if (!result?.ok) throw new Error(result?.error?.message ?? "probe failed");
 		return result.value;
 	});
@@ -528,7 +528,7 @@ function QoderSection({ form, connection }) {
 		}, 500);
 	};
 	if (snapshot.status === "loading") return h("div", { style: { opacity: 0.6 } }, "加载配置…");
-	if (snapshot.status === "unavailable") return h("div", null, "dsh-cli-subagent 配置未挂载(检查 profile bundles)。");
+	if (snapshot.status === "unavailable") return h("div", null, "dsh-cli-hub 配置未挂载(检查 profile bundles)。");
 	const providers = snapshot.value?.providers ?? [];
 	const configured = new Set(providers.map((spec) => spec.name));
 	const missing = BUILTIN_BACKENDS.filter((entry) => !configured.has(entry.name));
@@ -731,14 +731,14 @@ function SectionIcon(props) {
 }
 
 function apply(ctx) {
-	ctx.effect(() => ctx.locale.register(LOCALE_NS, LOCALES), "dsh-cli-subagent: copy");
+	ctx.effect(() => ctx.locale.register(LOCALE_NS, LOCALES), "dsh-cli-hub: copy");
 	ctx.effect(() => {
 		const tag = document.createElement("style");
-		tag.dataset.plugin = "dsh-cli-subagent";
+		tag.dataset.plugin = "dsh-cli-hub";
 		tag.textContent = STYLE;
 		document.head.append(tag);
 		return () => tag.remove();
-	}, "dsh-cli-subagent: styles");
+	}, "dsh-cli-hub: styles");
 	// 管理界面只在设置侧边栏的「子代理」分区注册（见 panel.js 的 registerPanel），
 	// 插件页不再注册配置区；旧的 settings.section 表单(QoderSection)保留组件备回退。
 	for (const toolName of BUILTIN_BACKENDS.map((backend) => backend.name)) {
@@ -755,14 +755,14 @@ function apply(ctx) {
 	try {
 		ctx.slots.inject("settings.section.icon", () => {
 			try {
-				return ctx.slots.register({ name: "settings.section.icon", id: "dsh-cli-subagent", order: 17 }, SectionIcon);
+				return ctx.slots.register({ name: "settings.section.icon", id: "dsh-cli-hub", order: 17 }, SectionIcon);
 			} catch (error) {
-				console.warn("[dsh-cli-subagent] 设置分区图标注册失败，保留默认齿轮", error);
+				console.warn("[dsh-cli-hub] 设置分区图标注册失败，保留默认齿轮", error);
 				return undefined;
 			}
 		});
 	} catch (error) {
-		console.warn("[dsh-cli-subagent] settings.section.icon 槽位不可用，保留默认齿轮", error);
+		console.warn("[dsh-cli-hub] settings.section.icon 槽位不可用，保留默认齿轮", error);
 	}
 }
 

@@ -1,8 +1,8 @@
-# 注册 dsh-cli-subagent 提供方插件;委派工具由插件按“已启用后端”动态挂载,
+# 注册 dsh-cli-hub 提供方插件;委派工具由插件按“已启用后端”动态挂载,
 # 预设与斜杠指令同样跟随启用项,因此这里只需插入插件本身。
 - insert:
-    - id: dsh-cli-subagent
-      name: 'dsh-cli-subagent'
+    - id: dsh-cli-hub
+      name: 'dsh-cli-hub'
 
     # Agent 预设:让 dsh 本地模型担任指挥,把任务委派给上面的外部 CLI 后端,
     # 像一个小团队一样协调它们。

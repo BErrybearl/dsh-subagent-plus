@@ -3,7 +3,7 @@ import React from "react";
 /**
  * 子代理运行面板：输入框上方 dock（conversation.input.dock）+「子代理」标签页
  * （conversation.view）+ 设置侧边栏「子代理」分区（settings.section，唯一管理入口）。
- * 数据来自 host 的 dsh-cli-subagent/runs 快照；开关存在插件 config 的 panel 节点
+ * 数据来自 host 的 dsh-cli-hub/runs 快照；开关存在插件 config 的 panel 节点
  * （cordis.patch.yml 可见），设置界面写回配置并即时生效，写不进去时退回本地覆盖。
  */
 const h = React.createElement;
@@ -19,9 +19,9 @@ const DEFAULTS = {
 	hideWhenIdle: false,
 	showCost: false,
 };
-const HIDE_KEY = "dsh-cli-subagent.panel.hideAt";
-const OVERRIDE_KEY = "dsh-cli-subagent.panel.override";
-const EVT = "dsh-cli-subagent:panel-cfg";
+const HIDE_KEY = "dsh-cli-hub.panel.hideAt";
+const OVERRIDE_KEY = "dsh-cli-hub.panel.override";
+const EVT = "dsh-cli-hub:panel-cfg";
 
 function readOverrides() {
 	try {
@@ -43,7 +43,7 @@ function readHideAt() {
 }
 
 function rpc(connection, endpoint, payload, timeout = 20000) {
-	return connection.rpc.call("/api", `dsh-cli-subagent/${endpoint}`, payload, AbortSignal.timeout(timeout)).then((result) => {
+	return connection.rpc.call("/api", `dsh-cli-hub/${endpoint}`, payload, AbortSignal.timeout(timeout)).then((result) => {
 		if (!result?.ok) throw new Error(result?.error?.message ?? "rpc failed");
 		return result.value;
 	});
@@ -1050,11 +1050,11 @@ const PANEL_STYLE = `
 export function registerPanel(ctx) {
 	ctx.effect(() => {
 		const tag = document.createElement("style");
-		tag.dataset.pluginPanel = "dsh-cli-subagent-panel";
+		tag.dataset.pluginPanel = "dsh-cli-hub-panel";
 		tag.textContent = PANEL_STYLE;
 		document.head.append(tag);
 		return () => tag.remove();
-	}, "dsh-cli-subagent: panel styles");
+	}, "dsh-cli-hub: panel styles");
 	const connection = () => ctx.get("connection");
 	// 共享 store 自己拉数据，连接在每次拉取时再取（注入时机不确定）。
 	runsStore.configure(connection);
@@ -1088,7 +1088,7 @@ export function registerPanel(ctx) {
 	// 管理界面只放一处:设置侧边栏的「子代理」分区,避免同一插件出现两个入口。
 	ctx.slots.inject("settings.section", () => ctx.slots.register({
 		name: "settings.section",
-		id: "dsh-cli-subagent",
+		id: "dsh-cli-hub",
 		order: 17,
 		label: () => "子代理",
 	}, () => h(Settings, { connection: connection() })));

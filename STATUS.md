@@ -1,10 +1,10 @@
-# STATUS — dsh-cli-subagent
+# STATUS — dsh-cli-hub
 
 ## 当前
 
 - 2.0.0（未发布）：适配 dsh 0.2.2-rc.2，`engines.dsh` 与 peer 依赖下限 `>=0.2.2-rc.1 <0.3.0`。
-- 2.0.0 更名：npm 包名 `dsh-subagent` → `dsh-cli-subagent`，GitHub 仓库名同步改为 `dsh-cli-subagent`；
-  内部插件 id 仍是 `subagent-cli`，配置节点为 `dsh-cli-subagent`。发布仓库为 GitHub `dsh-cli-subagent`（main 分支）。
+- 2.0.2 更名：npm 包名 `dsh-cli-subagent` → `dsh-cli-hub`（已发布到 registry.npmjs.org），插件 id 与配置节点同步为 `dsh-cli-hub`；
+  GitHub 仓库名保留 `BErrybearl/dsh-cli-subagent`。同版修复所有后端派发的 `reading 'id'` undefined（startActivation spec 平铺）。
 - 2.0.0 新增 `lib/compat.js`：内部包引用（`dsh-tools` 的 `defineTool`、`dsh-llm` 的 `createUserMessage` /
   `boundContextSummary`、`dsh-tool-subagent`、`dsh-session` 的 `SessionId`）改为能力探测，缺包/缺导出只降级并打
   `[dsh-subagent] compat: ...` 警告，插件仍能加载；`apply` 启动时跑一次服务探测。
